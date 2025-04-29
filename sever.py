@@ -57,6 +57,66 @@ class Tuple_space:
             "client count": self.client_connected_count
         }
 
+# handle clients' requests
+def handle_clients(client_socket, client_address,tuple_space):
+    tuple_space.client_connected_count += 1
+    print(f"New client connected from {client_address}")
+    try:
+        # use a while loop to receieve clients' requests
+        while true:
+            message_size = client_socket.recv(3).decode("utf-8")
+            message_inf = client_socket.recv(int(message_size)-3).decode("utf-8")
+            message = message_size +' '+ message_inf
+            operation_inf = message_inf[0]
+            key_value = message_inf[2:].split(' ', 1)
+            key = key_value[0]
+            value = key_value[1]
+
+            response_final = ''
+            if operation_inf == "R":
+                v = tuple_space.read(key)
+                if v:
+                    response = f'OK {(key,value)}read'
+                    # normalize The response as ‘NNN’
+                    response_final = f'{str(len(response)+4).zfill(3)} {response}'
+                else:
+                    response = f'ERR {key} does not exist'
+                    response_final = f'{str(len(response)+4).zfill(3)} {response}'
+            elif operation_inf == "G":
+                v = tuple_space.get(key)
+                if v:
+                    response = f'OK {(key,value)}get'
+                    response_final = f'{str(len(response)+4).zfill(3)} {response}'
+                else:
+                    response = f'ERR {key} does not exist'
+                    response_final = f'{str(len(response)+4).zfill(3)} {response}'
+            elif operation_inf == "P":
+                e = tuple_space.get(key,value)
+                if e == 0:
+                    response = f'OK {(key,value)}put'
+                    response_final = f'{str(len(response)+4).zfill(3)} {response}'
+                elif e==1:
+                    response = f'ERR {key} already exists'
+                    response_final = f'{str(len(response)+4).zfill(3)} {response}'
+
+            response_final = client_socket.sendall(response_final.encode("utf-8"))
+    except Exception as e:
+        print(f'Error handling client {client_address}')
+    finally:
+        client_socket.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
