@@ -7,5 +7,14 @@ class Tuple_space:
         self.get_count = 0
         self.put_count = 0
 
+    def read(self, key):
+        if key in self.tuples:
+           self.read_count += 1
+           self.totaloperations_count += 1
+           return self.tuples[key]
+        else:
+            print("Key doesn't exist")
+            self.error_count += 1
+            return ''
 
     
