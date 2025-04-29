@@ -26,3 +26,16 @@ class Tuple_space:
         else:
             print("Key doesn't exist, getting fails")
             return ''
+
+    def put(self,key,value):
+        if key not in self.tuples:
+            self.tuples[key] = value
+            self.put_count += 1
+            self.totaloperations_count += 1
+            return 0
+        else:
+            print("Key already exists, putting fails")
+            self.error_count += 1
+            return 1
+
+
