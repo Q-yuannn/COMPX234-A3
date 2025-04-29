@@ -106,6 +106,37 @@ def handle_clients(client_socket, client_address,tuple_space):
         client_socket.close()
 
 
+def start_sever():
+    host = 'localhost'
+    port = 51234
+    tuple_space = Tuple_space()
+    sever_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sever_socket.bind((host, port))
+    sever_socket.listen(5)
+
+    print("Sever is running and ready to accept multiple clients")
+    def printinfor_thread(tuple_space):
+        while True:
+            time.sleep(10)
+            tuple_space.calculations_dataNeeded()
+
+    threading.Thread(target=printinfor_thread(tuple_space), daemon=True).start()
+    
+    try:
+        while True:
+            client_socket, client_address = sever_socket.accept()
+            client_thread = threading.Thread(target=handle_clients, args=(client_socket, client_address, tuple_space))
+            client_thread.start()
+    except KeyboardInterrupt:
+        print("Keyboard interrupt received, shutting down")
+    finally:
+        sever_socket.close()
+
+
+if __name__ == '__main__':
+    start_sever()
+
+
 
 
 
