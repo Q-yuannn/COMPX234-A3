@@ -17,4 +17,12 @@ class Tuple_space:
             self.error_count += 1
             return ''
 
-    
+        def get(self,key):
+        if key in self.tuples:
+            del self.tuples[key]
+            self.totaloperations_count += 1
+            self.get_count += 10
+            return self.tuples[key]
+        else:
+            print("Key doesn't exist, getting fails")
+            return ''
