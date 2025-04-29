@@ -38,4 +38,25 @@ class Tuple_space:
             self.error_count += 1
             return 1
 
+    def calculations_dataNeeded(self):
+        tuples_tupleNumber = len(self.tuples)
+        average_key_size = sum(len(k) for k in self.tuples.keys())/tuples_tupleNumber
+        average_value_size = sum(len(v) for v in self.tuples.values())/tuples_tupleNumber
+        average_tuple_size = average_key_size + average_value_size
+
+        return {
+            "tuples number": tuples_tupleNumber,
+            "average key size": average_key_size,
+            "average value size": average_value_size,
+            "average tuple size": average_tuple_size,
+            "total operations count": self.totaloperations_count,
+            "read count": self.read_count,
+            "get count": self.get_count,
+            "put count": self.put_count,
+            "error count": self.error_count,
+            "client count": self.client_connected_count
+        }
+
+
+
 
