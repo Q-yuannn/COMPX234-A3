@@ -1,11 +1,17 @@
+import socket
+import time
+import threading
+
+
 class Tuple_space:
-    def __init__(self, *args):
+    def __init__(self):
         self.tuples = {}
         self.client_connected_count = 0
         self.totaloperations_count = 0
         self.read_count = 0
         self.get_count = 0
         self.put_count = 0
+        self.error_count = 0
 
     def read(self, key):
         if key in self.tuples:
@@ -13,11 +19,11 @@ class Tuple_space:
            self.totaloperations_count += 1
            return self.tuples[key]
         else:
-            print("Key doesn't exist")
+            print("Key doesn't exist, reading fails")
             self.error_count += 1
             return ''
 
-        def get(self,key):
+    def get(self,key):
         if key in self.tuples:
             del self.tuples[key]
             self.totaloperations_count += 1
@@ -44,18 +50,17 @@ class Tuple_space:
         average_value_size = sum(len(v) for v in self.tuples.values())/tuples_tupleNumber
         average_tuple_size = average_key_size + average_value_size
 
-        return {
-            "tuples number": tuples_tupleNumber,
-            "average key size": average_key_size,
-            "average value size": average_value_size,
-            "average tuple size": average_tuple_size,
-            "total operations count": self.totaloperations_count,
-            "read count": self.read_count,
-            "get count": self.get_count,
-            "put count": self.put_count,
-            "error count": self.error_count,
-            "client count": self.client_connected_count
-        }
+        print(f"tuples number: {tuples_tupleNumber}")
+        print(f"average key size: {average_key_size}")
+        print(f"average value size: {average_value_size}")
+        print(f"average tuple size: {average_tuple_size}")
+        print(f"total operations count: {self.totaloperations_count}")
+        print(f"read count: {self.read_count}")
+        print(f"get count: {self.get_count}")
+        print(f"put count: {self.put_count}")
+        print(f"error count: {self.error_count}")
+        print(f"client count: {self.client_connected_count}")
+
 
 # handle clients' requests
 def handle_clients(client_socket, client_address,tuple_space):
@@ -66,7 +71,7 @@ def handle_clients(client_socket, client_address,tuple_space):
         while true:
             message_size = client_socket.recv(3).decode("utf-8")
             message_inf = client_socket.recv(int(message_size)-3).decode("utf-8")
-            message = message_size +' '+ message_inf
+            message = message_size + ' ' + message_inf
             operation_inf = message_inf[0]
             key_value = message_inf[2:].split(' ', 1)
             key = key_value[0]
@@ -80,7 +85,7 @@ def handle_clients(client_socket, client_address,tuple_space):
                     # normalize The response as ‘NNN’
                     response_final = f'{str(len(response)+4).zfill(3)} {response}'
                 else:
-                    response = f'ERR {key} does not exist'
+                    response = f'ERR {key} does not exist (in case of a READ using a key {key} that does not exist)'
                     response_final = f'{str(len(response)+4).zfill(3)} {response}'
             elif operation_inf == "G":
                 v = tuple_space.get(key)
@@ -88,7 +93,7 @@ def handle_clients(client_socket, client_address,tuple_space):
                     response = f'OK {(key,value)}get'
                     response_final = f'{str(len(response)+4).zfill(3)} {response}'
                 else:
-                    response = f'ERR {key} does not exist'
+                    response = f'ERR {key} does not exist (in case of a GET using a key {key} that does not exist)'
                     response_final = f'{str(len(response)+4).zfill(3)} {response}'
             elif operation_inf == "P":
                 e = tuple_space.get(key,value)
@@ -96,12 +101,12 @@ def handle_clients(client_socket, client_address,tuple_space):
                     response = f'OK {(key,value)}put'
                     response_final = f'{str(len(response)+4).zfill(3)} {response}'
                 elif e==1:
-                    response = f'ERR {key} already exists'
+                    response = f'ERR {key} already exists (in case of a PUT using a key {key} that already exists)'
                     response_final = f'{str(len(response)+4).zfill(3)} {response}'
 
-            response_final = client_socket.sendall(response_final.encode("utf-8"))
+            client_socket.sendall(response_final.encode("utf-8"))
     except Exception as e:
-        print(f'Error handling client {client_address}')
+        print(f'Error handling client {e}')
     finally:
         client_socket.close()
 
@@ -121,7 +126,7 @@ def start_sever():
             tuple_space.calculations_dataNeeded()
 
     threading.Thread(target=printinfor_thread(tuple_space), daemon=True).start()
-    
+
     try:
         while True:
             client_socket, client_address = sever_socket.accept()
