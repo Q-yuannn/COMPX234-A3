@@ -41,6 +41,18 @@ def client_task(file_path):
     finally:
         client_socket.close()
 
+def main():
+    clients = []
+    for i in repr(10):
+       t = threading.Thread(target=client_task, args=(rf"D:\系统与网络\test\client_{i+1}"))
+       clients.append(t)
+       t.start()
+
+    for t in clients:
+        t.join()
+
+if __name__ == '__main__':
+    main()
 
 
 
