@@ -20,7 +20,6 @@ class Tuple_space:
             self.totaloperations_count += 1
             return self.tuples[key]
            else:
-            #print(f"{key} doesn't exist, reading fails")
             self.error_count += 1
             return ''
 
@@ -33,7 +32,6 @@ class Tuple_space:
             self.get_count += 1
             return value
         else:
-            #print(f"{key} doesn't exist, getting fails")
             self.error_count += 1
             return ''
 
@@ -44,10 +42,10 @@ class Tuple_space:
             self.totaloperations_count += 1
             return 0
         else:
-            #print(f"{key} already exists, putting fails")
             self.error_count += 1
             return 1
 
+    # Calculate data that server output needs
     def calculations_dataNeeded(self):
         tuples_tupleNumber = len(self.tuples)
         if tuples_tupleNumber == 0:
@@ -76,7 +74,7 @@ def handle_clients(client_socket, client_address,tuple_space):
     tuple_space.client_connected_count += 1
     print(f"New client connected from {client_address}")
     try:
-        # receieve clients' requests
+        # receive clients' requests
         while True:
             message = client_socket.recv(1024).decode('utf-8')
             parts = message.split()
@@ -104,10 +102,11 @@ def handle_clients(client_socket, client_address,tuple_space):
                     response = f'OK {(key,value)} added'
                 elif e == 1:
                     response = f'ERR {key} already exists'
-            # else:
-            #      response = f"ERR invalid command"
+            # format response
             response_final = f"{str(len(response)+4).zfill(3)} {response}"
+
             lock.release()
+
             # send responses to clients
             client_socket.sendall(response_final.encode("utf-8"))
     except Exception as e:
@@ -121,9 +120,9 @@ def start_sever():
     port = 51234
     tuple_space = Tuple_space()
     sever_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # bind server to the port and server waits for connecting
     sever_socket.bind((host, port))
     sever_socket.listen(5)
-
     print("Sever is running and ready to accept multiple clients")
     def printinfor_thread(tuple_space):
         while True:
@@ -135,6 +134,7 @@ def start_sever():
 
     try:
         while True:
+            # accept client which is waiting for connection and handle the request
             client_socket, client_address = sever_socket.accept()
             client_thread = threading.Thread(target=handle_clients, args=(client_socket, client_address, tuple_space))
             client_thread.start()
