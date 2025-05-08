@@ -56,7 +56,8 @@ def main():
     clients = []
     # Create threads to do clients' work
     for i in range(10):
-       t = threading.Thread(target=client_task, args=(rf"D:\Github_files\lab3\test\client_{i+1}.txt",))
+       #t = threading.Thread(target=client_task, args=(rf"D:\Github_files\lab3\test\client_{i+1}.txt",))
+       t = threading.Thread(target=client_task, args=(f"client_{i + 1}.txt",))
        clients.append(t)
        t.start()
 
